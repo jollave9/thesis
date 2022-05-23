@@ -14,9 +14,9 @@ else:
     sys.exit("invalid file")
 # https://freewavesamples.com/files/Alesis-Sanctuary-QCard-Crickets.wav
 
-audio = AudioSegment.from_mp3(file)
+# audio = AudioSegment.from_mp3(file)
 signal, sr = sfile.read(file)
-samples = audio.get_array_of_samples()
+# samples = audio.get_array_of_samples()
 samples_sf = 0
 try:
     samples_sf = signal[:, 0]  # use the first channel for dual

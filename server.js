@@ -4,8 +4,8 @@ var cors = require('cors');
 // const mysql = require('mysql');
 const express = require('express')
 const fs = require('fs')
-
 const app = express()
+const path = require('path');
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
@@ -13,51 +13,26 @@ app.use(cors())
 app.use(express.static(__dirname + '/public/'));
 app.use(express.static(__dirname + '/data/'));
 app.use(express.static(__dirname + '/categories/'));
+app.use(express.static(__dirname + '/views/'));
+
+app.set('views',path.join(__dirname,'views'))
+app.set('view engine','ejs')
 
 const multer = require('multer');
 const { exec } = require('child_process');
-
-// var con = mysql.createConnection({
-//     host: "localhost",
-//     user: "root",
-//     password: ''
-// });
+const { render } = require('express/lib/response');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, './public')
     },
     filename: function (req, file, cb) {
-        // let querycount = `SELECT COUNT(id) AS count FROM result`
-        // con.query(querycount, (err, result)=>{
-        //     if (err) throw err;
-        //     console.log(result);
-        //     cb(null, 'video' + result[0].count + '.mp4')
-        // })    
         const length = fs.readdirSync('./public').length
         cb(null, `recording_${length}.wav`)
     }
   })
   
 const upload = multer({ storage: storage })
-
-// con.connect(err=> {
-//     if (err) throw err;
-//     console.log("Connected to mysql!");
-//     con.query("USE cutie_mini;", (err, result)=>{
-//         if (err) throw err;
-//         console.log("using cutie_mini");
-//     });
-// });
-
-// app.get('/',(req,res)=>{
-//     let query = `SELECT * FROM result`
-//     con.query(query, (err, result)=>{
-//         if (err) throw err;
-//         // console.log('get');
-//         res.json(result)
-//     }) 
-// })
 
 app.get('/recordings',(req,res)=>{
   let files = fs.readdirSync('./public')
@@ -117,6 +92,7 @@ const cleanCategories = (jsonData)=>{
     return this.substring(0, index) + replacement + this.substring(index + replacement.length);
   }
   let temp = []
+  len = jsonData.length
   for(data of jsonData){
     formatted = data
                 .replace('Category','')
@@ -139,7 +115,9 @@ const cleanCategories = (jsonData)=>{
     index === -1? temp.push(formatted): temp[index].score+= formatted.score
     
   }
-  return temp
+
+  // return temp
+  return temp.map(x=>{return{...x,score:x.score/len}})
 }
 app.post('/categories',(req,res)=>{
   // console.log(req.body)
@@ -158,5 +136,8 @@ app.post('/categories',(req,res)=>{
 app.get('/categories',(req,res)=>{
   let files = fs.readdirSync('./categories')
   res.json(files)
+})
+app.get('/decibel_level',(req,res)=>{
+  return res.render('results')
 })
 app.listen(5000,()=>console.log('listening on port 5000'))
