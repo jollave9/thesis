@@ -1,0 +1,11 @@
+incase of pi's ip is changing:
+- set SERVER in clienttcp.py to the current pi's ip.
+- inside the raspberry pi, change the content of /etc/hosts/ because tcpclassify.py will throw an error if hosts is not configured right
+
+        /etc/hosts
+127.0.0.1       localhost
+#127.0.1.1      raspberrypi
+#192.168.43.111 raspberrypi
+192.168.1.11    raspberrypi #change this to the current ip if error
+
+NOTE: setting static ip in pi might cause problem in connectivity and might become unaccessible.

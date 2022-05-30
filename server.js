@@ -7,12 +7,10 @@ const fs = require('fs')
 const app = express()
 const path = require('path');
 
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+app.use(express.json({limit:'50mb'}))
+app.use(express.urlencoded({extended:true,limit:'50mb'}))
 app.use(cors())
-app.use(express.static(__dirname + '/public/'));
 app.use(express.static(__dirname + '/data/'));
-app.use(express.static(__dirname + '/categories/'));
 app.use(express.static(__dirname + '/views/'));
 
 app.set('views',path.join(__dirname,'views'))
@@ -106,7 +104,7 @@ const cleanCategories = (jsonData)=>{
 
     // console.log(formatted)
     formatted=JSON.parse(formatted)
-    console.log(formatted)
+    // console.log(formatted)
 
     index = temp.findIndex((element)=>{
         return element.label===formatted.label
@@ -119,25 +117,86 @@ const cleanCategories = (jsonData)=>{
   // return temp
   return temp.map(x=>{return{...x,score:x.score/len}})
 }
-app.post('/categories',(req,res)=>{
-  // console.log(req.body)
+
+// app.post('/categories',(req,res)=>{
   
-  cc = cleanCategories(req.body.data)
-  const length = fs.readdirSync('./categories').length
-  fs.writeFile(`./categories/category_${length}.json`, JSON.stringify(cc), (error) => {
+//   cc = cleanCategories(req.body.data)
+//   const length = fs.readdirSync('./categories').length
+//   fs.writeFile(`./categories/category_${length}.json`, JSON.stringify(cc), (error) => {
+//     if (error) throw error;
+//   });
+
+//   res.sendStatus(200)
+// })
+
+// app.get('/categories',(req,res)=>{
+//   let files = fs.readdirSync('./categories')
+//   res.json(files)
+// })
+
+const createjsonfile = (filename,categories_json,decibel_level_json) =>{
+    //writing json file
+    file = `./data/${date}/${hour}/${minute}/${filename}_categories.json`
+    fs.writeFile(file, JSON.stringify(categories_json), (error) => {
     if (error) throw error;
   });
-  // for(s in req.body.data){
-  //   console.log
-  // }
+    //writing json file
+    file = `./data/${date}/${hour}/${minute}/${filename}_decibelLevel.json`
+    fs.writeFile(file, JSON.stringify(decibel_level_json), (error) => {
+      if (error) throw error;
+  }); 
+}
+app.post('/decibel_level',(req,res)=>{
+  decibelLevels = JSON.parse(req.body.decibelLevels)
+  categories = cleanCategories(req.body.categories)
+  console.log(decibelLevels)
+  console.log(categories)
+
+  datetime = req.body.date.split(' ')
+  date = datetime[0]
+  time = datetime[1].split(':')
+
+  hour = time[0]
+  minute = time[1]
+  console.log(`date:${date}, time:${time}, hour:${hour}, minute:${minute}`)
+
+  minutelydir = `./data/${date}/${hour}/${minute}`
+  hourlydir = `./data/${date}/${hour}`
+  dailydir = dir = `./data/${date}/`
+
+  fulldatetime = datetime.join('_').replaceAll(':','-').replaceAll('.','')
+  console.log(minutelydir)
+  console.log(hourlydir)
+  console.log(dailydir)
+  console.log(fulldatetime)
+
+  if (fs.existsSync(minutelydir)) {
+    console.log('minutelydir');
+    createjsonfile(fulldatetime,categories,decibelLevels)
+  }
+  else {
+    if (fs.existsSync(hourlydir)) {
+      console.log('hourlydir');
+      fs.mkdirSync(minutelydir);
+      createjsonfile(fulldatetime,categories,decibelLevels)
+    }
+    else{
+      
+      if (fs.existsSync(dailydir)) {
+        console.log('dailydir');
+        fs.mkdirSync(hourlydir);
+        createjsonfile(fulldatetime,categories,decibelLevels)
+      }
+      else{
+        fs.mkdirSync(dailydir);
+        fs.mkdirSync(hourlydir);
+        fs.mkdirSync(minutelydir);
+        createjsonfile(fulldatetime,categories,decibelLevels)
+      }
+    }
+  }
+
   res.sendStatus(200)
 })
 
-app.get('/categories',(req,res)=>{
-  let files = fs.readdirSync('./categories')
-  res.json(files)
-})
-app.get('/decibel_level',(req,res)=>{
-  return res.render('results')
-})
 app.listen(5000,()=>console.log('listening on port 5000'))
