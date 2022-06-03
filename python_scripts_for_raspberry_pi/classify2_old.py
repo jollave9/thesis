@@ -24,7 +24,7 @@ from scipy.io.wavfile import write
 import requests
 import numpy as np
 import json
-import datetime
+
 
 def run(
     model: str,
@@ -112,13 +112,26 @@ def run(
         arr.append(categories)
     audio_buffer = audio_record.getAudioBuffer2()
     audio_record.stop()
-
+    #buffer2 = audio_record.buffer * 10000
+    #f = np.asarray(buffer2,dtype=np.int16)
+    #f1 = np.asarray(buffer2,dtype=np.int16)
+    #f2 = np.append(f,f1,axis=1)
+    #f3 = np.asarray(f2,dtype=np.int16)
+    #narr = np.array(arr) * 10000
+    #narr1 = np.asarray(arr,dtype=np.int16)
+    #print(arr)
+    #arr *= 10000
+    #arr = np.asarray(arr,dtype=np.int16)
+    #write("output.wav", 44100, arr)
+    #lists = arr.tolist()
+    #print(arr)
+    #json_str = json.dumps(arr)
     #with open(f"n.json", "w") as outfile:
        #outfile.write(json_str)
     #audiofile = {"audio": open("output.wav", "rb")}
     #requests.post("httP://192.168.1.168:5000/", files=audiofile)
     obj = {'data':arr}
-    #requests.post("http://192.168.1.168:5000/categories",data=obj)
+    requests.post("http://192.168.1.168:5000/categories",data=obj)
     #np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
     #audio_buffer = audio_record.getAudioBuffer()
     flat_list = []
@@ -126,27 +139,18 @@ def run(
         for item in sublist:
             flat_list.append(item)
 
+    #print(np.array(flat_list2).astype(np.int16))
+    #print(len(audiobufferarr[0][0]))
+    #print(audiobufferarr)
+    #print(flat_list)
     audiobuffernd = np.array(flat_list)
-
+    #print(np.array(flat_list).flatten())
+    #print(audiobuffernd.astype(np.int16))
     write('output.wav',16000,audiobuffernd)
     audiofile = {"audio": open("output.wav", "rb")}
     requests.post("httP://192.168.1.168:5000/", files=audiofile)
-    #print(audiobuffernd,audiobuffernd.dtype)
+    #print(audiobuffernd)
     #print('len',len(audiobuffernd))
-    
-    decibelLevels = audio_record.getDecibelLevels()
-
-    obj2= {"data":
-           {"categories":str(arr),
-            "decibelLevels":decibelLevels
-            }
-           }
-    
-    d = datetime.datetime.now()
-
-    print(d)
-    obj = {"data":[{"decibelLevels":decibelLevels}]}
-    requests.post("http://192.168.1.168:5000/data",data={"decibelLevels":json.dumps(decibelLevels),"categories":arr,"date":str(d)} )
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
