@@ -33,6 +33,38 @@ const storage = multer.diskStorage({
   
 const upload = multer({ storage: storage })
 
+app.get('/dailysummary',(req,res)=>{
+  // query params :date
+  // return daily summary page
+})
+
+app.get('/hourlysummary',(req,res)=>{
+  // query params :date, hour
+  // return hourly summary page
+})
+
+app.get('/minutes/',(req,res)=>{
+  // query params: date, hour
+  // return all minute folders in the date 
+})
+
+app.get('/hours/:date',(req,res)=>{
+  // params: date
+  // return all hour folders in the date 
+})
+
+app.get('/days',(req,res)=>{
+  // return all day folders
+})
+
+app.get('/summary',(req,res)=>{
+  // query params: date or date and hour
+  // return summary json files
+})
+app.get('/data',(req,res)=>{
+  // query params: date, hour, minute
+  // return json files
+})
 // app.get('/recordings',(req,res)=>{
 //   let files = fs.readdirSync('./public')
 //   res.json(files)
@@ -285,7 +317,7 @@ const createDailySummary = (dailydir,hourlydir)=>{
     console.log('decibel levels daily summary')
     console.log(decibel_levels_summary)
 
-    createDecibelLevelSummary(hourlydir,decibel_levels_hourly_summary,decibel_levels_summary)
+    createDecibelLevelSummary(dailydir,decibel_levels_hourly_summary,decibel_levels_summary)
 
   }
   else{
